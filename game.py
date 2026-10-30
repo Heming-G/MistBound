@@ -4,8 +4,8 @@ import secrets
 from maze import MAX_SEED, MAP_VERSION, generate
 
 FLASH_DURATION = 1.7
-NORMAL_RADIUS = 3
-FLASH_RADIUS = 7
+NORMAL_RADIUS = 2.5
+FLASH_RADIUS = 5
 
 
 def line_cells(start, end):
@@ -65,7 +65,7 @@ class Game:
 
     @property
     def radius(self):
-        return NORMAL_RADIUS + self.collected * 0.4
+        return NORMAL_RADIUS + self.collected * 0.2
 
     def walkable(self, x, y):
         return 0 <= x < self.width and 0 <= y < self.height and self.grid[y][x] != "#"

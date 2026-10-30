@@ -92,7 +92,7 @@ class GameTests(unittest.TestCase):
         self.assertEqual((g.charges, g.flashes_used), (0, 2))
         self.assertIn('still explore', g.message)
 
-    def test_original_visibility_wall_occlusion_flash_and_memory(self):
+    def test_midpoint_visibility_wall_occlusion_flash_and_memory(self):
         g = Game(SEED)
         g.grid = ('#########', '#.......#', '#.......#', '#...#...#', '#.......#', '#.......#', '#########')
         g.width, g.height = 9, 7
@@ -101,13 +101,15 @@ class GameTests(unittest.TestCase):
         g.reveal()
         target = (5, 3)
         self.assertNotIn(target, g.visible)
-        self.assertIn((3, 0), g.visible)
-        self.assertEqual(NORMAL_RADIUS, 3)
+        self.assertIn((1, 2), g.visible)
+        self.assertNotIn((3, 0), g.visible)
+        self.assertEqual(NORMAL_RADIUS, 2.5)
         self.assertTrue(all(math.dist(g.player, cell) <= NORMAL_RADIUS for cell in g.visible))
         g.flash()
         self.assertIn(target, g.visible)
         self.assertIn((8, 3), g.visible)
-        self.assertEqual(FLASH_RADIUS, 7)
+        self.assertNotIn((8, 5), g.visible)
+        self.assertEqual(FLASH_RADIUS, 5)
         self.assertTrue(all(math.dist(g.player, cell) <= FLASH_RADIUS for cell in g.visible))
         revealed = set(g.visible)
         g.update(FLASH_DURATION + 1)
@@ -123,12 +125,12 @@ class GameTests(unittest.TestCase):
         for step in steps:
             g.move(*step)
         self.assertEqual((g.collected, g.charges), (1, 2))
-        self.assertAlmostEqual(g.radius, 3.4)
+        self.assertAlmostEqual(g.radius, 2.7)
         dx, dy = steps[-1]
         g.move(-dx, -dy)
         g.move(dx, dy)
         self.assertEqual((g.collected, g.charges), (1, 2))
-        self.assertAlmostEqual(g.radius, 3.4)
+        self.assertAlmostEqual(g.radius, 2.7)
         self.assertIn('grows', g.message)
 
     def test_exit_explains_missing_fragments(self):
@@ -146,7 +148,7 @@ class GameTests(unittest.TestCase):
             collect_all(g)
             self.assertTrue(g.won)
             self.assertEqual(g.collected, 4)
-            self.assertAlmostEqual(g.radius, 4.6)
+            self.assertAlmostEqual(g.radius, 3.3)
             self.assertEqual(g.flashes_used, 0)
             snapshot = g.player, g.steps, g.elapsed, g.charges
             g.move(-1, 0)
@@ -163,7 +165,7 @@ class GameTests(unittest.TestCase):
         for field in ('seed', 'grid', 'player', 'seen', 'lights', 'charges', 'steps', 'elapsed', 'won'):
             self.assertEqual(getattr(g, field), getattr(fresh, field))
         old_key = g.map_key
-        self.assertEqual(old_key, f'v3-{SEED:06d}')
+        self.assertEqual(old_key, f'v4-{SEED:06d}')
         g.new_map()
         self.assertNotEqual(g.seed, SEED)
         self.assertNotEqual(g.map_key, old_key)

@@ -14,7 +14,7 @@ Every new map randomizes the maze, starting point, fragment locations and exit. 
 
 - **Move:** WASD or arrow keys. Holding a direction moves at a controlled rate; walls block movement.
 - **Flash:** Space or the Flash button. Start with **two charges**. A flash reveals nearby routes **through walls for 1.7 seconds**, and dim outlines remain afterward.
-- **Sight:** normal vision starts at a radius of **3 tiles** and stops at walls. Each fragment adds **0.4 tiles**, reaching radius **4.6** after all four. Flash vision has a radius of **7 tiles** (up to 15 across). Both areas are circular.
+- **Sight:** normal vision starts at a radius of **2.5 tiles** and stops at walls. Each fragment adds **0.2 tiles**, reaching radius **3.3** after all four. Flash vision has a radius of **5 tiles** (up to 11 across). Both areas are circular. These values are midway between the original and reduced-sight versions.
 - **Collect:** walk over a gold diamond. Each fragment restores one flash and slightly expands ordinary sight.
 - **Exit:** enter the portal after collecting all four fragments. Before that, it explains how many are missing.
 - **Pause/help:** Esc or the Pause button. Switching windows also pauses. Time and flash duration freeze while paused. Resume explicitly with Esc, Enter or Continue.
@@ -67,7 +67,7 @@ The dependency is **pygame-ce**, imported as `pygame`. Its exact version is reco
 uv run python -m unittest -v
 ```
 
-All **21 tests** pass. They cover random-map connectivity and objective spacing, replay reproducibility, restored sight ranges and growth, fog memory, collection, completion without flashes, pause and confirmation handling, ranking and map isolation, persistence, and missing/corrupt/unwritable score files. Automated checks are developer verification, not a participant trial.
+All **21 tests** pass. They cover random-map connectivity and objective spacing, replay reproducibility, midpoint sight ranges and growth, fog memory, collection, completion without flashes, pause and confirmation handling, ranking and map isolation, persistence, and missing/corrupt/unwritable score files. Automated checks are developer verification, not a participant trial.
 
 An additional stress check passed on 1,000 map numbers: all floor tiles were connected, objectives were reachable and minimum start spacing held. The environment is macOS, Python 3.14.7 and pygame-ce 2.5.8. The revised application also opened and rendered with the native Cocoa display driver. Windows and Linux have not been tested.
 
@@ -98,4 +98,4 @@ On a headless macOS/Linux machine, prefix this image command with `SDL_VIDEODRIV
 
 Closing loses an unfinished run. Only completed records persist. The UI is English, uses a fixed window size and has no sound. It has not been evaluated for screen-reader use. Local records do not sync across computers. Map numbers are reproducible within this rules version; generation or gameplay changes should increment the map version.
 
-The roommate tried the original game without a prior explanation. Their feedback informed random maps, an initial sight reduction, a fourth fragment and same-map records. The student later requested restoring the original, larger sight ranges; the current rules use version v3 so scores from the reduced-sight version stay separate. See PROCESS.md. The current version has not yet had a participant retest. The student must follow the run instructions and review the code. Public GitHub upload and a signed-out access check remain pending.
+The roommate tried the original game without a prior explanation. Their feedback informed random maps, an initial sight reduction, a fourth fragment and same-map records. After restoring the larger sight ranges, the student found them too large and requested a midpoint. The current rules use version v4, keeping earlier visibility versions' records separate. See PROCESS.md. The current version has not yet had a participant retest. The student must follow the run instructions and review the code. Public GitHub upload and a signed-out access check remain pending.

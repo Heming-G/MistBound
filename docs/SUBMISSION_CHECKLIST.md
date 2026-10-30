@@ -2,7 +2,7 @@
 
 - [x] Working Python game, dependency metadata and exact uv commands.
 - [x] Original graphics drawn by the code; no external asset files required.
-- [x] Random reachable maps, four separated fragments and restored original sight ranges.
+- [x] Random reachable maps, four separated fragments and midpoint sight ranges.
 - [x] Same-map replay, new maps and persistent local top-five records.
 - [x] README with rendered frames and limitations.
 - [x] PROCESS with honest AI contribution and decisions.

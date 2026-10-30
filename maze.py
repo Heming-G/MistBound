@@ -4,7 +4,7 @@ import random
 
 WIDTH, HEIGHT = 25, 17
 FRAGMENTS = 4
-MAP_VERSION = "v3"
+MAP_VERSION = "v4"
 MAX_SEED = 999_999
 
 

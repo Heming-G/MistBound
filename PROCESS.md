@@ -28,6 +28,8 @@ On 31 October 2026, the student requested a larger illuminated area and a return
 
 The first trial meets the brief's condition of trying the experience before its controls were explained. The revised version has not yet been retested by a participant. Difficulty and whether the new record system motivates replay remain open questions. See `docs/USER_TRIAL.md`.
 
+Later on 31 October, the student said the original sight was still too large and requested a midpoint between the two versions. The current ordinary radius is 2.5 with 0.2 growth per fragment (maximum 3.3); the flash radius is 5. At every collection stage, these are the arithmetic midpoints between the original growing sight and the reduced version's fixed radius 2; flash radius 5 is midway between 7 and 3. The rules version is now v4, retaining earlier records in separate groups. This adjustment comes from the student's feedback, not a claimed participant retest.
+
 ## Implementation choices after the trial
 
 ### Randomness with constraints
@@ -52,15 +54,15 @@ OpenAI Codex assisted with assignment interpretation, ideas, Python implementati
 
 - Kept: remembered fog and limited flashes replenished by collection.
 - Changed: a fixed-map exploration demo became a constrained random-map game after participant feedback.
-- Iterated: the participant's request initially led to smaller sight without growth. After reviewing that direction, the student requested restoring the original larger sight and collection-based growth; Codex implemented that decision.
+- Iterated: the participant's request initially led to smaller sight without growth. The student then requested restoring the original sight, found that too large, and asked for a midpoint. Codex implemented the intermediate radius and growth values.
 - Scope decision: a global leaderboard was replaced by local same-map records so random-map scores are comparable without accounts or a server.
 
 ## Verification
 
-All 21 tests pass. They include 50 generated maps checked for connected floors and objective spacing, reproducibility and varied placements, no-flash completion on 10 maps, collision and feedback, restored radius-3/radius-7 visibility and one-time sight growth per fragment, reset and new-map confirmation, pause/focus/records behavior, and one-time completion saving. Record tests verify sorting, the five-entry cap, map/rules-version isolation, reloads, invalid data, corruption preservation and simulated write failures.
+All 21 tests pass. They include 50 generated maps checked for connected floors and objective spacing, reproducibility and varied placements, no-flash completion on 10 maps, collision and feedback, midpoint radius-2.5/radius-5 visibility and one-time growth of 0.2 per fragment, reset and new-map confirmation, pause/focus/records behavior, and one-time completion saving. Record tests verify sorting, the five-entry cap, map/rules-version isolation, reloads, invalid data, corruption preservation and simulated write failures.
 
 A separate stress check passed on 1,000 map numbers for connected floors, reachable objectives and minimum spacing from the start. The revised application opened and rendered with the native macOS Cocoa driver. Game-rendered frames of the title, normal sight, flash, pause, confirmation, completion and records screens were visually reviewed, including a full five-entry table. Preview records are isolated from the real local file. These developer checks do not imply a successful participant retest.
 
 ## Development history
 
-Commits preserve the original fixed-map version, the response to roommate feedback (random maps, smaller sight, four fragments and local records), and the student's later request to restore the original light ranges under rules version v3. Further changes after a real retest should be committed with their reasons.
+Commits preserve the original fixed-map version, the response to roommate feedback (random maps, smaller sight, four fragments and local records), the restoration under v3 rules, and the student's subsequent midpoint adjustment under v4 rules. Further changes after a real retest should be committed with their reasons.

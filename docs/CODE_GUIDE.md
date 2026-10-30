@@ -30,11 +30,11 @@ This connects input, meaningful state change and visible feedback. The repeated-
 
 ## Movement and collection
 
-`Game.move(dx, dy)` accepts a single horizontal or vertical step. It checks `walkable()` before moving. A wall leaves the position and step count unchanged. On a fragment tile, it removes that fragment, updates the count and grants a flash. Normal sight starts at radius 3 and grows by 0.4 per fragment, up to 4.6. The exit checks whether all four fragments were collected before setting `won`.
+`Game.move(dx, dy)` accepts a single horizontal or vertical step. It checks `walkable()` before moving. A wall leaves the position and step count unchanged. On a fragment tile, it removes that fragment, updates the count and grants a flash. Normal sight starts at radius 2.5 and grows by 0.2 per fragment, up to 3.3. The exit checks whether all four fragments were collected before setting `won`.
 
 ## How the fog works
 
-Ordinary vision checks distance and walls. `line_cells()` lists grid cells along a straight line using the Bresenham algorithm; a wall before the target blocks normal vision. Flash mode skips wall blocking and uses radius 7. A rounded-up bounding box allows the fractional ordinary radius to be checked against actual distances. Drawing then uses `visible` and `seen` to select bright, dim or black tiles.
+Ordinary vision checks distance and walls. `line_cells()` lists grid cells along a straight line using the Bresenham algorithm; a wall before the target blocks normal vision. Flash mode skips wall blocking and uses radius 5. A rounded-up bounding box allows the fractional ordinary radius to be checked against actual distances. Drawing then uses `visible` and `seen` to select bright, dim or black tiles.
 
 The smooth movement and glow effects are only drawings. They do not decide whether the player can walk through a wall or collect a fragment; those rules remain in `game.py`.
 
