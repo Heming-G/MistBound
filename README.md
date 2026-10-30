@@ -2,26 +2,40 @@
 
 **Find the light. Remember the way.** A small Python exploration game about navigating uncertainty with a limited resource.
 
-![Gameplay: one light fragment collected, with bright current sight and dim remembered paths](docs/gameplay.png)
+![Reduced sight and dim remembered paths on a generated map](docs/gameplay.png)
 
 ## Idea and intended player
 
-Mistbound is for someone who enjoys a short exploration puzzle. You are a small light in a fog-covered maze. Collect **three gold light fragments**, then reach the **green exit**. There are no enemies or time limits. The challenge is deciding where to explore and when to spend a flash.
+Mistbound is for someone who enjoys a short exploration puzzle. You are a small light in a fog-covered maze. Collect **four gold light fragments**, then reach the **green exit**. There are no enemies or time limits. The challenge is choosing where to explore and when to spend a flash.
 
-The map has branches, dead ends and loops. It is fixed, so a second attempt lets you apply what you learned and compare your time, steps and flashes used.
+Every new map randomizes the maze, starting point, fragment locations and exit. Reachable objectives are separated so they do not all appear beside the start. A six-digit map number lets you replay the same challenge and compare local records fairly.
 
 ## Interaction
 
 - **Move:** WASD or arrow keys. Holding a direction moves at a controlled rate; walls block movement.
-- **Flash:** Space or the Flash button. Start with **two charges**. A flash reveals nearby routes **through walls for 1.7 seconds**, and the dim outlines remain afterward.
-- **Collect:** Walk over a gold diamond. Each fragment restores one flash and slightly increases normal sight.
-- **Exit:** Enter the portal after collecting all three fragments. Before that, it explains how many are missing.
-- **Pause/help:** Esc or the Pause button. Switching to another window also pauses the game. Time and flash duration freeze while paused. Resume explicitly with Esc, Enter or Continue.
-- **Restart:** R, then Enter to confirm. Esc cancels. Closing the window stops the game.
+- **Flash:** Space or the Flash button. Start with **two charges**. A flash reveals nearby routes **through walls for 1.7 seconds**, and dim outlines remain afterward.
+- **Sight:** normal vision has a radius of **2 tiles** (up to 5 tiles across) and stops at walls. Flash vision has a radius of **3 tiles** (up to 7 across). Both areas are circular. Collecting a fragment no longer expands sight.
+- **Collect:** walk over a gold diamond. Each fragment restores one flash.
+- **Exit:** enter the portal after collecting all four fragments. Before that, it explains how many are missing.
+- **Pause/help:** Esc or the Pause button. Switching windows also pauses. Time and flash duration freeze while paused. Resume explicitly with Esc, Enter or Continue.
+- **Retry this map:** R, then Enter to confirm. Layout and objectives stay identical; run progress resets. Esc cancels.
+- **New random map:** N, then Enter to confirm during play. From the completion screen, N starts a new map immediately.
+- **Map records:** L or the Map records button. This pauses the current run and shows the local top five for that map. Esc, Enter or L returns.
+- **Stop:** close the window. The unfinished run is not saved.
 
-**Bright** tiles are visible now; **dim** tiles were explored earlier; **black** areas are unknown. Normal sight stops at walls. Small dots mark tiles you have stepped on. You can finish even after spending every flash: ordinary sight never disappears.
+**Bright** tiles are visible now; **dim** tiles were explored earlier; **black** areas are unknown. Small dots mark tiles you have stepped on. You can finish with zero flashes: ordinary sight never disappears.
 
-![A flash reveals nearby routes through walls](docs/flash.png)
+![A small flash reveals nearby routes through walls](docs/flash.png)
+
+## Local records
+
+A completed run records **steps, active playing time and flashes used**. Ranking uses the fewest steps first, then the fastest time to a tenth of a second. Flashes are displayed but do not affect rank. Exact ties retain completion order. Only the best five runs for the **same map number and rules version** are kept; different maps are never ranked together.
+
+Records are stored in `local_scores.json` beside the program. They survive closing the game. They contain no player names or account information, are local to this copy of the project, and are excluded from Git. This is a personal challenge board, not a verified online competition.
+
+If the records file cannot be read or written, the game still works and explains that records are available only for this session. An unreadable file is left unchanged. Gameplay can continue with memory-only records.
+
+![Completion screen with same-map records](docs/won.png)
 
 ## Run from a fresh terminal
 
@@ -37,44 +51,51 @@ uv sync --locked
 uv run python main.py
 ```
 
-On the development Mac, you can also double-click **Launch.command** after installing uv. The terminal instructions are the primary way to reproduce the setup. In VS Code, open this folder and use its terminal to run the same commands; no editor extension is required.
+To reopen a particular map, use its number:
 
-The dependency is **pygame-ce**, which is imported as `pygame`. Its exact resolved version is recorded in `uv.lock`. Do not separately install the original `pygame` package into this environment; both use the same import name. No API keys, accounts, external assets or microphone are needed.
+```sh
+uv run python main.py --seed 261030
+```
 
-## Verification
+Numbers from 0 to 999999 are supported. The same number reproduces the same map under the current version. On the development Mac, you can also double-click **Launch.command** after installing uv. In VS Code, open this folder and run the same commands in its terminal.
+
+The dependency is **pygame-ce**, imported as `pygame`. Its exact version is recorded in `uv.lock`. Do not separately install the original `pygame` into this environment: both share an import name. No API keys, accounts, external assets or microphone are needed.
+
+## Verification and example frames
 
 ```sh
 uv run python -m unittest -v
 ```
 
-The tests use an offscreen display and check map reachability, wall collisions, limited flashes, repeated input, fog memory, collection rewards, the locked exit, completion with zero flashes, reset, keyboard controls and pause/restart behavior. Automated checks are developer verification, not a participant trial.
+All **21 tests** pass. They cover random-map connectivity and objective spacing, replay reproducibility, smaller sight and fog memory, collection, completion without flashes, pause and confirmation handling, ranking and map isolation, persistence, and missing/corrupt/unwritable score files. Automated checks are developer verification, not a participant trial.
 
-Tested on macOS with Python 3.14.7, pygame-ce 2.5.8 and the Cocoa display driver. All 12 tests pass, and a scripted full application playthrough collects three fragments and reaches the completion screen. Windows and Linux have not been tested.
+An additional stress check passed on 1,000 map numbers: all floor tiles were connected, objectives were reachable and minimum start spacing held. The environment is macOS, Python 3.14.7 and pygame-ce 2.5.8. The revised application also opened and rendered with the native Cocoa display driver. Windows and Linux have not been tested.
 
-The README images are **actual frames rendered by the game using a scripted example**, not illustrations of an unimplemented design or records of a user trial. To regenerate them:
+The README images are actual game-rendered frames from a scripted example. The preview uses memory-only records and does not read or change your real leaderboard. To regenerate them:
 
 ```sh
 uv run python main.py --screenshots docs
 ```
 
-For a machine with no desktop display, the image command can use `SDL_VIDEODRIVER=dummy` on macOS/Linux. Normal play needs a desktop.
+On a headless macOS/Linux machine, prefix this image command with `SDL_VIDEODRIVER=dummy`. Normal play needs a desktop.
 
 ## Files
 
 | File | Purpose |
 | --- | --- |
-| `main.py` | Window, input, drawing, animation, menus and game loop |
-| `game.py` | Map, movement, visibility, collection, flashes and win conditions |
-| `test_game.py` | Rules and application interaction tests |
-| `pyproject.toml`, `uv.lock`, `.python-version` | Reproducible Python environment |
-| `PROCESS.md` | Design decisions, AI contribution and participant-trial status |
-| `CREDITS.md` | Code, tool and asset credits |
-| `docs/CODE_GUIDE.md` | A short guide to explaining the program |
-| `docs/USER_TRIAL.md` | Record for a real participant trial, still to complete |
+| `main.py` | Window, input, rendering, menus and game loop |
+| `game.py` | Movement, fog, collection, flashes and completion |
+| `maze.py` | Seeded maze generation, spacing rules and path searches |
+| `scores.py` | Local top-five ranking, loading and atomic saving |
+| `test_game.py`, `test_scores.py` | Gameplay and record-file checks |
+| `pyproject.toml`, `uv.lock`, `.python-version` | Reproducible environment |
+| `PROCESS.md`, `CREDITS.md` | Design process, AI contribution and credits |
+| `docs/CODE_GUIDE.md` | Guide to explaining the program |
+| `docs/USER_TRIAL.md` | Actual roommate feedback and resulting decisions |
 | `docs/SUBMISSION_CHECKLIST.md` | Remaining submission preparation |
 
-## Limitations and current status
+## Limitations and submission status
 
-There is one fixed map, no save file, no sound and no hosted browser version. Closing the game loses the current run. The UI is English and uses a fixed window size. The fog and animation are visual; the game has not been evaluated for screen-reader use. Cross-platform behavior and difficulty still need real user feedback.
+Closing loses an unfinished run. Only completed records persist. The UI is English, uses a fixed window size and has no sound. It has not been evaluated for screen-reader use. Local records do not sync across computers. Map numbers are reproducible within this rules version; generation or gameplay changes should increment the map version.
 
-**Before assignment submission:** complete a real participant trial, record the observation and resulting decision in PROCESS.md, and replace the pending trial text. The student must also follow the run instructions themselves and review the code. A public GitHub upload and signed-out access check are still pending.
+Roommate feedback informed random maps, tighter sight, a fourth fragment and same-map records; see PROCESS.md. Whether the first trial began without an explanation is still to confirm, and the revised version has not yet had a participant retest. The student must follow the run instructions and review the code. Public GitHub upload and a signed-out access check remain pending.

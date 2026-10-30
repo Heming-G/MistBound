@@ -2,56 +2,63 @@
 
 ## Starting idea and intention
 
-The student wanted a manageable Python project with an English interface and documentation. An earlier plant-care prototype felt too simple, so the student selected a fog-covered exploration map. After discussing how to add challenge, they approved limited-use flashes that are replenished by collecting light fragments.
+The student wanted a manageable Python project with an English interface and documentation. After an earlier flower-care prototype, the student chose a fog-covered exploration map and approved limited-use flashes replenished by collecting fragments.
 
-The intended player enjoys exploring and making small choices. The interaction loop is: choose a direction or use a flash, observe the newly visible route and resource count, then choose where to go next.
+The intended player enjoys exploring and making small choices. The loop is: choose a direction or use a flash, observe a newly visible route and the remaining resource, then choose where to go next.
 
-## Design decisions
+## Initial implementation
 
-### Limited information, with memory
+The first playable version used one fixed maze and three fragments. Ordinary sight began at radius 3 and grew after collection; a flash revealed through walls to radius 7. Explored tiles remained dim. It included wall feedback, pause on window switching, restart confirmation, and a final time/step/flash summary.
 
-Ordinary sight is small and blocked by walls. A flash has a larger radius and reveals through walls. Previously revealed tiles remain dim afterward. This makes a flash useful for planning beyond the next corner, while preventing the player from having to memorize everything. A persistent text legend explains bright, dim and unknown areas.
+During developer review, a persistent fog legend and a brightness floor were added for clarity. Stale wall warnings and expired-flash messages were corrected. These were developer findings, not participant observations.
 
-### Scarcity without a permanent failure state
+## Real participant trial and response
 
-The player starts with two flashes. Each of the three fragments grants one more and slightly increases normal sight. The game remains completable with zero flashes; there is no dying light or irreversible loss. The fixed map lets the player use knowledge from a previous attempt. Time, steps and flashes used support an optional personal challenge rather than a mandatory time limit.
+The student reported feedback from one roommate on 30 October 2026. The exact session date, duration, first actions, completion result and whether controls were explained beforehand were not supplied. Those details are not invented here. The wording below summarizes the reported observations rather than quoting a transcript.
 
-### A map that can be checked
+| Reported feedback | Decision | Implemented response |
+| --- | --- | --- |
+| After two or three plays the map was easy to remember; random maps, fragments and exits might help. | Provide fresh exploration while allowing deliberate replay. | Seeded maze generation randomizes layout, start, four fragments and exit. R retries the current map; N creates a different map number. |
+| The illuminated area felt too large; reduce it and add one or two fragments. | Tighten sight and add one objective before attempting a larger increase. | Ordinary radius is now 2 tiles, flash radius 3, and there are four fragments. Collection restores one flash but no longer expands ordinary sight. |
+| Time and step counters did not feel meaningful; consider a leaderboard. | Make comparisons meaningful within one map. | Each map has a persistent local top five, ordered by steps then time, with flashes shown as extra information. |
 
-The layout was developed using a deterministic maze-generation sketch, with extra openings to create loops, then stored as an explicit grid in the source. Three fragments and an exit are placed on reachable paths. The generation sketch is not a runtime dependency. Automated graph searches check every floor tile is connected and that collecting everything and reaching the exit is possible.
+The report mentioned a range of six tiles without specifying radius or diameter. The implementation uses the explicit radius-2/radius-3 values agreed in the follow-up discussion; these span at most five and seven tiles respectively. This is a design interpretation, not an additional participant measurement.
 
-### Handling interruption and repeated actions
+The revised version has not yet been retested by a participant. Difficulty and whether the new record system motivates replay remain open questions. The first trial's no-prior-explanation condition still needs confirmation; if it was explained, arrange an unassisted trial with another person before submission. See `docs/USER_TRIAL.md`.
 
-Movement is bounded by walls and limited to one grid step per interval. Pressing Flash again while it is active does not consume another charge; trying with no charges gives a helpful message. Switching windows pauses the timer and flash duration. Restart requires confirmation and can be cancelled. Menus remove hidden gameplay buttons from the set of clickable targets.
+## Implementation choices after the trial
 
-### Iteration during implementation
+### Randomness with constraints
 
-The first render lacked an always-visible explanation of the three fog states; a compact legend was added above the map. Visible distant tiles were also given a brightness floor so they cannot look darker than remembered tiles. Rendered frames of the title, gameplay, flash, pause, restart and completion screens were inspected for layout.
+A seeded backtracking algorithm carves connected rooms, then opens a small number of extra walls for loops. The exit is at least 18 walking steps from the start. Each fragment is at least eight walking steps from the start and five from the exit. Fragment pairs are at least five tiles apart in Manhattan distance and eight walking steps apart. This avoids isolated objectives, immediate wins and clusters near the start.
 
-These changes came from developer review. They are **not** findings from a participant trial.
+A six-digit seed reproduces the map. The rules-version prefix keeps leaderboard records separate when map or scoring rules change. The generator uses ordered inputs with a local random generator, so replay does not depend on unrelated animation randomness.
 
-A further feedback check found that a wall warning could remain after a successful move, and an active-flash message could remain after the flash expired. Those messages now update to match the current state; the regression checks verify the transition.
+### Scarcity without permanent failure
+
+There are two initial flashes and one additional charge per fragment. Normal sight remains available when flashes run out. Revealed paths remain in memory. There are no enemies or mandatory time limits; the challenge comes from route decisions. Time and flash duration pause in help, records, confirmation screens or on loss of focus.
+
+### Fair local records
+
+Different random maps may have very different route lengths, so scores are compared only for the same map and rules. Steps rank first; time to a tenth of a second breaks ties. Flash count is displayed without changing rank. Exact ties retain completion order. Completed runs are recorded once, while retrying or abandoning an unfinished run creates no result.
+
+The score file is local, contains no names and is ignored by Git. Saving uses a temporary file and replacement to protect the previous data if a write fails. Missing files start empty; unreadable files are preserved, and read/write errors produce a session-only board rather than stopping play.
 
 ## AI tools and contribution
 
-OpenAI Codex was used for assignment interpretation, idea generation, Python implementation, tests, visual rendering checks and drafting English documentation. The student selected the final idea, required Python and English deliverables, and approved the limited-flash mechanic. The current code and documents were created with substantial AI assistance and still need the student's own review and understanding.
+OpenAI Codex assisted with assignment interpretation, ideas, Python implementation, tests, visual checks and drafting English documentation. The student selected the project, specified Python and English deliverables, reported the roommate's feedback and approved the revisions. The source and documents were produced with substantial AI assistance and still need the student's own review and understanding.
 
-- Suggestion kept: remembered fog plus scarce flashes, with each fragment restoring a charge.
-- Suggestion changed: the initial maze proposal relied on exploration and collection alone; after the student asked for more challenge, limited flashes were added as a resource decision.
-- Scope decision: enemies and continuous light depletion were discussed but omitted in favor of a small, recoverable exploration experience.
+- Kept: remembered fog and limited flashes replenished by collection.
+- Changed: a fixed-map exploration demo became a constrained random-map game after participant feedback.
+- Changed: collecting a fragment no longer enlarges normal sight because the trial found visibility too generous.
+- Scope decision: a global leaderboard was replaced by local same-map records so random-map scores are comparable without accounts or a server.
 
-## Developer verification
+## Verification
 
-All 12 automated tests pass. They cover connected map layout, blocked and invalid positions, flash exhaustion and repeated use, normal wall occlusion, flash visibility and memory, one-time collection rewards, a locked exit, completion without flashes, reset, keyboard input, pause on focus loss, restart confirmation and rendering/menu input boundaries.
+All 21 tests pass. They include 50 generated maps checked for connected floors and objective spacing, reproducibility and varied placements, no-flash completion on 10 maps, collision and feedback, fixed sight limits, one-time rewards, reset and new-map confirmation, pause/focus/records behavior, and one-time completion saving. Record tests verify sorting, the five-entry cap, map isolation, reloads, invalid data, corruption preservation and simulated write failures.
 
-A separate scripted application playthrough went through three fragments and the exit in 96 steps, entering the real completion screen. The application also opened and rendered using the native macOS Cocoa display driver. README images are game-rendered example frames from a scripted sequence. These checks do not replace a real participant trial.
-
-## Real participant trial — pending
-
-No participant has tried this version yet. Before submission, ask at least one other person to try it without explaining the controls first. Observe what they attempt, where they hesitate, and whether movement, fog, flashes and the exit make sense. Use `docs/USER_TRIAL.md` to record observations without identifying the person.
-
-Replace this section with the actual observation and one resulting improvement, or an explanation of why the design was kept. Do not invent a trial or present the automated playthrough as participant evidence.
+A separate stress check passed on 1,000 map numbers for connected floors, reachable objectives and minimum spacing from the start. The revised application opened and rendered with the native macOS Cocoa driver. Game-rendered frames of the title, normal sight, flash, pause, confirmation, completion and records screens were visually reviewed, including a full five-entry table. Preview records are isolated from the real local file. These developer checks do not imply a successful participant retest.
 
 ## Development history
 
-The first commit records the implemented exploration and resource mechanics with tests. A later commit adds documentation and rendered example frames. After the real participant trial, record any further changes and the reason for them in a new commit.
+Commits preserve the original fixed-map version and its documentation. The next revision records the actual response to the roommate feedback: random maps, smaller sight, four fragments, local records, updated checks and documentation. Further changes after a real retest should be committed with their reasons.

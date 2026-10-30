@@ -2,17 +2,17 @@
 
 - [x] Working Python game, dependency metadata and exact uv commands.
 - [x] Original graphics drawn by the code; no external asset files required.
-- [x] README with rendered application images and limitations.
-- [x] PROCESS with honest AI contribution and design decisions.
-- [x] Credits and development commits.
-- [x] Rules, input and interruption tests pass.
-- [x] Native display launch and scripted completion verified.
-- [x] Rendered title, game, flash, pause, restart and win screens inspected.
-- [ ] Student follows README from a fresh terminal and plays the main interaction.
-- [ ] At least one other person tries it without prior explanation.
-- [ ] Record real observations and resulting change or reason for keeping the design.
-- [ ] Update PROCESS.md and remove pending trial text.
-- [ ] Student can explain a piece of input → response → feedback code.
+- [x] Random reachable maps, four separated fragments and smaller sight.
+- [x] Same-map replay, new maps and persistent local top-five records.
+- [x] README with rendered frames and limitations.
+- [x] PROCESS with honest AI contribution and decisions.
+- [x] Real roommate feedback recorded and used for the revision.
+- [x] Gameplay, random-map and record-file tests pass.
+- [x] Development commits preserve decisions and revisions.
+- [ ] Confirm the participant tried the original game before controls were explained; otherwise arrange an unassisted trial.
+- [ ] Student follows README from a fresh terminal and plays the revised game.
+- [ ] Student reviews and can explain input → state change → feedback.
+- [ ] Final documentation review, including the trial-condition confirmation.
 - [ ] Publish the complete project under Heming-G in one public GitHub repository, preserving commits.
-- [ ] Verify the repository while signed out, with no credentials or personal data included.
+- [ ] Verify signed-out public access and exclude local scores, credentials and personal data.
 - [ ] Student submits that repository URL on Canvas by 1 November 2026, 23:59 Hong Kong time.

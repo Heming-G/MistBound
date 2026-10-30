@@ -6,6 +6,7 @@
 - Font: the default font distributed with pygame-ce, loaded using `pygame.font.Font(None, size)`; no font file is separately redistributed in this repository.
 - Environment management: **uv** by Astral, <https://docs.astral.sh/uv/>.
 - Graphics: original geometric shapes, glow layers, particles and map tiles drawn in Python with AI assistance. No downloaded images, audio or datasets.
-- Maze: generated during development from a deterministic sketch, adjusted with loops and stored in this project's source. No third-party map or tutorial code was copied.
+- Maze: an AI-assisted implementation of standard backtracking generation and breadth-first path searches, with original placement constraints and extra loops. It now generates from a seed at runtime. No third-party map or tutorial code was copied.
+- Participant feedback: an anonymous roommate trial, reported by the student, informed the revised map, sight and record system. See PROCESS.md for the reported details and remaining uncertainty.
 - Visibility: an implementation of the standard Bresenham line algorithm checks walls between the player and a tile; flash visibility uses Euclidean distance.
 - Requirements: the course's Assignment 3 brief informed the deliverables. The brief itself is not redistributed.

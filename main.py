@@ -8,6 +8,8 @@ import random
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 import pygame
 from game import Game
+from maze import MAX_SEED, route
+from scores import Leaderboard
 
 WIDTH, HEIGHT = 1040, 800
 TILE, MAP_X, MAP_Y = 30, 36, 170
@@ -22,15 +24,25 @@ def format_time(seconds):
     return f"{seconds // 60:02d}:{seconds % 60:02d}"
 
 
+def record_time(seconds):
+    tenths = round(seconds * 10)
+    return f"{tenths // 600:02d}:{(tenths // 10) % 60:02d}.{tenths % 10}"
+
+
 class App:
-    def __init__(self):
+    def __init__(self, seed=None, scores_path=Path(__file__).with_name("local_scores.json")):
         pygame.display.init()
         pygame.font.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Mistbound — find your way through the light")
         self.clock = pygame.time.Clock()
         self.fonts = {s: pygame.font.Font(None, s) for s in (18, 20, 22, 24, 28, 32, 38, 48, 64)}
-        self.game = Game()
+        self.game = Game(seed)
+        self.scores = Leaderboard(scores_path)
+        self.run_rank = None
+        self.run_saved = False
+        self.board_return = "home"
+        self.reset_kind = "replay"
         self.mode, self.previous_mode = "home", "playing"
         self.running = True
         self.next_move = 0
@@ -79,8 +91,13 @@ class App:
             pygame.draw.circle(layer, (*color, int((1 - r / (radius + 1)) * 45)), (radius + 1, radius + 1), r)
         self.screen.blit(layer, (position[0] - radius - 1, position[1] - radius - 1))
 
-    def fresh_game(self):
-        self.game.reset()
+    def fresh_game(self, new_map=False):
+        if new_map:
+            self.game.new_map()
+        else:
+            self.game.reset()
+        self.run_rank = None
+        self.run_saved = False
         self.visual_player = list(self.game.player)
         self.effects.clear()
         self.wall_until = 0
@@ -88,9 +105,9 @@ class App:
         self.mode = "playing"
 
     def action(self, action):
-        allowed = {"home": {"begin"}, "playing": {"pause", "restart", "flash"},
-                   "paused": {"resume", "restart"}, "restart": {"begin", "cancel"},
-                   "won": {"begin", "quit"}}
+        allowed = {"home": {"begin", "board"}, "playing": {"pause", "restart", "new", "flash", "board"},
+                   "paused": {"resume", "restart", "new", "board"}, "restart": {"confirm", "cancel"},
+                   "won": {"replay", "new", "quit"}, "board": {"back"}}
         if action not in allowed.get(self.mode, set()):
             return
         if action == "begin":
@@ -100,8 +117,20 @@ class App:
             self.next_move = pygame.time.get_ticks() + 150
         elif action == "pause" and self.mode == "playing":
             self.mode = "paused"
-        elif action == "restart":
+        elif action == "board":
+            self.board_return, self.mode = self.mode, "board"
+        elif action == "back":
+            self.mode = self.board_return
+            self.next_move = pygame.time.get_ticks() + 150
+        elif action == "replay":
+            self.fresh_game()
+        elif action == "new" and self.mode == "won":
+            self.fresh_game(new_map=True)
+        elif action in ("restart", "new"):
+            self.reset_kind = "new" if action == "new" else "replay"
             self.previous_mode, self.mode = self.mode, "restart"
+        elif action == "confirm":
+            self.fresh_game(new_map=self.reset_kind == "new")
         elif action == "cancel":
             self.mode = self.previous_mode
         elif action == "flash" and self.mode == "playing":
@@ -118,6 +147,8 @@ class App:
         elif result == "collected":
             self.effects.append([self.game.player, self.sim_time, GOLD])
         elif result == "won":
+            self.run_rank, self.run_saved = self.scores.add(
+                self.game.map_key, self.game.steps, self.game.elapsed, self.game.flashes_used)
             self.mode = "won"
 
     def handle(self, event):
@@ -134,10 +165,12 @@ class App:
             key = event.key
             if self.mode == "home":
                 if key == pygame.K_RETURN:
-                    self.fresh_game()
+                    self.action("begin")
+                elif key == pygame.K_l:
+                    self.action("board")
             elif self.mode == "restart":
                 if key == pygame.K_RETURN:
-                    self.fresh_game()
+                    self.action("confirm")
                 elif key == pygame.K_ESCAPE:
                     self.action("cancel")
             elif self.mode == "paused":
@@ -145,9 +178,18 @@ class App:
                     self.action("resume")
                 elif key == pygame.K_r:
                     self.action("restart")
+                elif key == pygame.K_n:
+                    self.action("new")
+                elif key == pygame.K_l:
+                    self.action("board")
+            elif self.mode == "board":
+                if key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_l):
+                    self.action("back")
             elif self.mode == "won":
                 if key in (pygame.K_RETURN, pygame.K_r):
-                    self.fresh_game()
+                    self.action("replay")
+                elif key == pygame.K_n:
+                    self.action("new")
             elif self.mode == "playing":
                 if key in MOVES and pygame.time.get_ticks() >= self.next_move:
                     self.move(MOVES[key])
@@ -157,6 +199,10 @@ class App:
                     self.action("pause")
                 elif key == pygame.K_r:
                     self.action("restart")
+                elif key == pygame.K_n:
+                    self.action("new")
+                elif key == pygame.K_l:
+                    self.action("board")
 
     def update(self, dt):
         self.sim_time += dt
@@ -226,9 +272,9 @@ class App:
     def draw_dashboard(self):
         g, x = self.game, 818
         self.text("YOUR JOURNEY", x, 175, 18, MUTED)
-        self.text(f"{g.collected} / 3", x, 202, 48, GOLD)
+        self.text(f"{g.collected} / {g.total_lights}", x, 202, 48, GOLD)
         self.text("light fragments", x, 250, 20, MUTED)
-        for i in range(3):
+        for i in range(g.total_lights):
             pygame.draw.circle(self.screen, GOLD if i < g.collected else (53, 57, 64), (x + 10 + i * 30, 285), 7)
         pygame.draw.line(self.screen, (40, 55, 74), (x, 314), (1001, 314))
         self.text(f"{g.charges:02d}", x, 335, 48, CYAN)
@@ -237,10 +283,28 @@ class App:
         self.paragraph("See through nearby walls for 1.7 seconds. Each fragment restores one flash.", x, 471, 182, 20)
         self.text(format_time(g.elapsed), x, 578, 32)
         self.text(f"{g.steps} steps", x, 617, 22, MUTED)
+        self.button("Map records [L]", (x, 649, 184, 31), "board", VIOLET)
         if g.flash_remaining > 0:
             self.text("FLASH ACTIVE", MAP_X + 590, 142, 18, CYAN)
         else:
-            self.text("EXIT OPEN" if g.collected == 3 else "EXIT LOCKED", MAP_X + 608, 142, 18, GREEN if g.collected == 3 else MUTED)
+            self.text("EXIT OPEN" if g.collected == g.total_lights else "EXIT LOCKED", MAP_X + 608, 142, 18,
+                      GREEN if g.collected == g.total_lights else MUTED)
+
+    def draw_records(self, y):
+        self.text("RANK", 280, y, 18, MUTED)
+        self.text("STEPS", 380, y, 18, MUTED)
+        self.text("TIME", 500, y, 18, MUTED)
+        self.text("FLASHES", 657, y, 18, MUTED)
+        rows = self.scores.for_map(self.game.map_key)
+        for i, row in enumerate(rows, 1):
+            line_y = y + 30 + (i - 1) * 26
+            color = CYAN if self.mode == "won" and i == self.run_rank else TEXT
+            self.text(f"#{i}", 280, line_y, 22, color)
+            self.text(str(row.steps), 380, line_y, 22, color)
+            self.text(record_time(row.seconds), 500, line_y, 22, color)
+            self.text(str(row.flashes), 680, line_y, 22, color)
+        if not rows:
+            self.text("No completed runs on this map yet.", WIDTH // 2, y + 70, 22, MUTED, True)
 
     def modal(self):
         shade = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
@@ -254,35 +318,52 @@ class App:
         if self.mode == "home":
             self.text("A SMALL EXPLORATION IN LIGHT & MEMORY", cx, 172, 18, CYAN, True)
             self.text("MISTBOUND", cx, 230, 64, TEXT, True)
-            self.paragraph("The paths are hidden. Your light is small. Find three fragments to open the way home.", 280, 285, 480, 24, TEXT)
-            for i, (key, meaning) in enumerate([("WASD / Arrows", "Move through the maze"), ("Space", "Flash: reveal routes through walls"), ("Esc", "Pause / help"), ("R", "Start over, with confirmation")]):
-                self.text(key, 280, 386 + i * 33, 20, CYAN)
-                self.text(meaning, 448, 386 + i * 33, 20, MUTED)
-            self.text("Explored paths stay dim. Two flashes to start. No time limit.", cx, 551, 20, MUTED, True)
+            self.paragraph("The paths are hidden. Your light is small. Find four fragments to open the way home.", 280, 285, 480, 24, TEXT)
+            for i, (key, meaning) in enumerate([("WASD / Arrows", "Move through the maze"), ("Space", "Flash: reveal routes through walls"), ("Esc", "Pause / help"), ("R / N", "Retry / new map, with confirmation"), ("L", "Local records for this map")]):
+                self.text(key, 280, 366 + i * 31, 20, CYAN)
+                self.text(meaning, 448, 366 + i * 31, 20, MUTED)
+            self.text("Four lights. Two flashes. Explored paths stay dim.", cx, 534, 20, MUTED, True)
+            self.text(f"MAP {self.game.seed:06d}  /  New routes each map. No time limit.", cx, 560, 18, VIOLET, True)
             self.button("Begin exploration [Enter]", (300, 591, 440, 48), "begin")
         elif self.mode == "paused":
             self.text("TAKE A BREATH", cx, 190, 18, CYAN, True)
             self.text("Journey paused", cx, 242, 48, TEXT, True)
             self.paragraph("Your timer and flash are paused. Move with WASD or arrow keys. Press Space to reveal nearby routes through walls.", 280, 299, 480, 24, TEXT)
-            self.paragraph("Bright = visible now. Dim = explored before. Black = unknown. Collect all three gold fragments, then find the green exit.", 280, 402, 480, 22)
-            self.button("Continue [Esc / Enter]", (300, 520, 440, 48), "resume")
-            self.button("Start over [R]", (300, 582, 440, 44), "restart", VIOLET)
+            self.paragraph("Bright = visible now. Dim = remembered. Black = unknown. Find all four gold fragments, then the green exit. L opens map records.", 280, 402, 480, 22)
+            self.button("Continue [Esc / Enter]", (300, 491, 440, 42), "resume")
+            self.button("Retry this map [R]", (300, 546, 440, 40), "restart", VIOLET)
+            self.button("New random map [N]", (300, 600, 440, 40), "new", VIOLET)
         elif self.mode == "restart":
             self.text("A FRESH START", cx, 205, 18, VIOLET, True)
-            self.text("Restart this journey?", cx, 266, 38, TEXT, True)
-            self.paragraph("This resets your explored map, fragments, steps and timer. You will begin with two flashes again.", 280, 332, 480, 24, TEXT)
-            self.button("Restart [Enter]", (300, 474, 440, 48), "begin", VIOLET)
+            self.text("Explore a new map?" if self.reset_kind == "new" else "Retry the same map?", cx, 266, 38, TEXT, True)
+            detail = "A new maze, fragment positions and exit replace this run." if self.reset_kind == "new" else f"Map {self.game.seed:06d} stays the same. Your current run will reset."
+            self.paragraph(detail + " You start with two flashes. Completed records are kept.", 280, 332, 480, 24, TEXT)
+            self.button("Confirm [Enter]", (300, 474, 440, 48), "confirm", VIOLET)
             self.button("Cancel [Esc]", (300, 540, 440, 48), "cancel")
         elif self.mode == "won":
-            self.text("ALL THREE LIGHTS BROUGHT HOME", cx, 185, 18, GOLD, True)
-            self.text("Through the mist.", cx, 248, 48, TEXT, True)
-            for i, (value, label) in enumerate([(format_time(self.game.elapsed), "TIME"), (str(self.game.steps), "STEPS"), (str(self.game.flashes_used), "FLASHES USED")]):
+            self.text("ALL FOUR LIGHTS BROUGHT HOME", cx, 162, 18, GOLD, True)
+            self.text("Through the mist.", cx, 205, 48, TEXT, True)
+            for i, (value, label) in enumerate([(record_time(self.game.elapsed), "TIME"), (str(self.game.steps), "STEPS"), (str(self.game.flashes_used), "FLASHES USED")]):
                 x = 340 + i * 180
-                self.text(value, x, 356, 38, CYAN, True)
-                self.text(label, x, 398, 18, MUTED, True)
-            self.text("A remembered path. A different way next time?", cx, 467, 22, TEXT, True)
-            self.button("Explore again [Enter]", (300, 530, 440, 48), "begin")
-            self.button("Close game", (300, 592, 440, 40), "quit", MUTED)
+                self.text(value, x, 268, 32, CYAN, True)
+                self.text(label, x, 298, 18, MUTED, True)
+            rank = f"Your rank: #{self.run_rank}" if self.run_rank else "Local map records"
+            if self.run_rank and self.run_rank > 5:
+                rank += " (outside top five)"
+            self.text(f"MAP {self.game.seed:06d}  /  {rank}", cx, 338, 20, VIOLET, True)
+            self.text("Fewest steps first; time breaks ties.", cx, 359, 18, MUTED, True)
+            self.draw_records(372)
+            self.text(self.scores.notice or "Fewest steps first, then fastest time.", cx, 542, 18, MUTED, True)
+            self.button("Replay this map [Enter]", (300, 574, 440, 38), "replay")
+            self.button("New random map [N]", (300, 624, 440, 38), "new", VIOLET)
+        elif self.mode == "board":
+            self.text("YOUR LOCAL TOP FIVE", cx, 176, 18, VIOLET, True)
+            self.text(f"Map {self.game.seed:06d}", cx, 230, 48, TEXT, True)
+            self.text("Fewest steps first; fastest time breaks ties.", cx, 283, 22, MUTED, True)
+            self.text("Only runs on this map and these rules are compared.", cx, 315, 20, MUTED, True)
+            self.draw_records(365)
+            self.text(self.scores.notice or "Complete a run to save a local record.", cx, 548, 18, MUTED, True)
+            self.button("Back [Esc / Enter]", (300, 591, 440, 48), "back")
 
     def draw(self):
         self.click_targets.clear()
@@ -298,12 +379,12 @@ class App:
             self.text(label, x + 17, 113, 18, MUTED)
         if self.mode == "playing":
             self.button("Pause / help [Esc]", (813, 35, 192, 40), "pause", MUTED)
-        self.text("THE UNSEEN PATH", MAP_X, 142, 18, MUTED)
+        self.text(f"MAP {self.game.seed:06d}  /  THE UNSEEN PATH", MAP_X, 142, 18, MUTED)
         self.draw_map()
         self.draw_dashboard()
         pygame.draw.line(self.screen, (40, 55, 74), (36, 709), (1003, 709))
         self.paragraph(self.game.message, 37, 728, 965, 22, TEXT)
-        self.text("WASD / Arrows  move     Space  flash     Esc  pause     R  restart", 37, 775, 18, MUTED)
+        self.text("WASD / Arrows  move     Space  flash     Esc  pause     R  retry     N  new map     L  records", 37, 775, 18, MUTED)
         if self.mode != "playing":
             self.modal()
 
@@ -318,19 +399,19 @@ class App:
         pygame.quit()
 
 
-def preview(destination):
+def preview(destination, seed=261030):
     """Render real application frames for documentation, using a scripted example."""
-    app = App()
+    app = App(seed=seed, scores_path=None)
     folder = Path(destination)
     folder.mkdir(parents=True, exist_ok=True)
     app.draw()
     pygame.image.save(app.screen, folder / "start.png")
     app.fresh_game()
     app.game.flash()
-    for _ in range(6):
-        app.game.move(1, 0)
-    for _ in range(2):
-        app.game.move(0, 1)
+    first = min(app.game.lights)
+    for step in route(app.game.grid, app.game.player, first):
+        app.move(step)
+        app.game.update(0.145)
     app.visual_player = list(app.game.player)
     app.game.update(1.8)
     app.draw()
@@ -338,14 +419,31 @@ def preview(destination):
     app.game.flash()
     app.draw()
     pygame.image.save(app.screen, folder / "flash.png")
+    for target in sorted(app.game.lights):
+        for step in route(app.game.grid, app.game.player, target):
+            app.move(step)
+            app.game.update(0.145)
+    for step in route(app.game.grid, app.game.player, app.game.exit):
+        app.move(step)
+        app.game.update(0.145)
+    app.visual_player = list(app.game.player)
+    app.draw()
+    pygame.image.save(app.screen, folder / "won.png")
+    app.mode = "playing"
+    app.action("board")
+    app.draw()
+    pygame.image.save(app.screen, folder / "records.png")
     pygame.quit()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Mistbound — a small maze of light and memory")
     parser.add_argument("--screenshots", metavar="FOLDER", help="render example application frames and exit")
+    parser.add_argument("--seed", type=int, help="replay a map number, from 0 to 999999")
     args = parser.parse_args()
+    if args.seed is not None and not 0 <= args.seed <= MAX_SEED:
+        parser.error("--seed must be between 0 and 999999")
     if args.screenshots:
-        preview(args.screenshots)
+        preview(args.screenshots, 261030 if args.seed is None else args.seed)
     else:
-        App().run()
+        App(seed=args.seed).run()

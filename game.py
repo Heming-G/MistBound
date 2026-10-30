@@ -1,26 +1,11 @@
 """Maze rules. Rendering and keyboard handling live in main.py."""
 import math
+import secrets
+from maze import MAX_SEED, MAP_VERSION, generate
 
-MAP = (
-    "#########################",
-    "#S..................#...#",
-    "#.#.###.###.#.#.###.#.#.#",
-    "#.#...#*..#.#...#.#...#.#",
-    "#.###.###...###.#.#####.#",
-    "#.#...#...#.....#....*#.#",
-    "#.#.###.###########.#.#.#",
-    "#...#.........#.....#...#",
-    "#.#.#.#.#.#.###.#.#.#.###",
-    "#...#.#...#.......#.#...#",
-    "#.#.#.#######.#.#.###.#.#",
-    "#...#.......#.#.#.....#.#",
-    "#########.###.#.###.#.#.#",
-    "#....*....#...#.....#.#.#",
-    "#.#.#.#.#.#..##.#.#####.#",
-    "#...#.....#.....#......E#",
-    "#########################",
-)
 FLASH_DURATION = 1.7
+NORMAL_RADIUS = 2
+FLASH_RADIUS = 3
 
 
 def line_cells(start, end):
@@ -44,15 +29,17 @@ def line_cells(start, end):
 
 
 class Game:
-    def __init__(self):
-        self.reset()
+    def __init__(self, seed=None):
+        self.reset(secrets.randbelow(MAX_SEED + 1) if seed is None else seed)
 
-    def reset(self):
-        self.grid = MAP
-        self.width, self.height = len(MAP[0]), len(MAP)
-        self.player = next((x, y) for y, row in enumerate(MAP) for x, c in enumerate(row) if c == "S")
-        self.exit = next((x, y) for y, row in enumerate(MAP) for x, c in enumerate(row) if c == "E")
-        self.lights = {(x, y) for y, row in enumerate(MAP) for x, c in enumerate(row) if c == "*"}
+    def reset(self, seed=None):
+        seed = self.seed if seed is None else seed
+        self.grid = generate(seed)
+        self.seed = seed
+        self.width, self.height = len(self.grid[0]), len(self.grid)
+        self.player = next((x, y) for y, row in enumerate(self.grid) for x, c in enumerate(row) if c == "S")
+        self.exit = next((x, y) for y, row in enumerate(self.grid) for x, c in enumerate(row) if c == "E")
+        self.lights = {(x, y) for y, row in enumerate(self.grid) for x, c in enumerate(row) if c == "*"}
         self.total_lights = len(self.lights)
         self.collected = 0
         self.charges = 2
@@ -64,22 +51,31 @@ class Game:
         self.seen = set()
         self.visible = set()
         self.visited = {self.player}
-        self.message = "Find three light fragments. Your first two flashes are ready."
+        self.message = f"Find {self.total_lights} light fragments. Your first two flashes are ready."
         self.reveal()
+
+    def new_map(self):
+        # Select a different map number without an unbounded retry loop.
+        seed = secrets.randbelow(MAX_SEED)
+        self.reset(seed + (seed >= self.seed))
+
+    @property
+    def map_key(self):
+        return f"{MAP_VERSION}-{self.seed:06d}"
 
     @property
     def radius(self):
-        return 3 + self.collected * 0.4
+        return NORMAL_RADIUS
 
     def walkable(self, x, y):
         return 0 <= x < self.width and 0 <= y < self.height and self.grid[y][x] != "#"
 
     def reveal(self):
-        radius = 7 if self.flash_remaining > 0 else self.radius
+        radius = FLASH_RADIUS if self.flash_remaining > 0 else self.radius
         px, py = self.player
         visible = set()
-        for y in range(max(0, py - 7), min(self.height, py + 8)):
-            for x in range(max(0, px - 7), min(self.width, px + 8)):
+        for y in range(max(0, py - radius), min(self.height, py + radius + 1)):
+            for x in range(max(0, px - radius), min(self.width, px + radius + 1)):
                 if math.hypot(x - px, y - py) > radius:
                     continue
                 # Ordinary light stops at walls; a scarce flash reveals through them.
@@ -101,13 +97,13 @@ class Game:
         self.visited.add(self.player)
         self.steps += 1
         if self.message.startswith("A wall"):
-            self.message = "The way is clear. Keep exploring for the three light fragments."
+            self.message = f"The way is clear. Keep exploring for the {self.total_lights} light fragments."
         result = "moved"
         if self.player in self.lights:
             self.lights.remove(self.player)
             self.collected += 1
             self.charges += 1
-            self.message = f"Fragment {self.collected}/3 found. +1 flash, and your light grows."
+            self.message = f"Fragment {self.collected}/{self.total_lights} found. +1 flash."
             if self.collected == self.total_lights:
                 self.message = "All fragments found. The exit is now open — find the green portal."
             result = "collected"
