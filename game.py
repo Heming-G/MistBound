@@ -100,6 +100,8 @@ class Game:
         self.player = x, y
         self.visited.add(self.player)
         self.steps += 1
+        if self.message.startswith("A wall"):
+            self.message = "The way is clear. Keep exploring for the three light fragments."
         result = "moved"
         if self.player in self.lights:
             self.lights.remove(self.player)
@@ -146,3 +148,5 @@ class Game:
         if self.flash_remaining > 0:
             self.flash_remaining = max(0.0, self.flash_remaining - dt)
             self.reveal()
+            if self.flash_remaining == 0 and self.message.startswith(("Flash!", "Your flash is still")):
+                self.message = "The flash faded. Revealed paths stay dim so you can plan your next move."

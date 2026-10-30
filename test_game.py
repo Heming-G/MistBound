@@ -52,6 +52,8 @@ class GameTests(unittest.TestCase):
         self.assertEqual(g.steps, 0)
         self.assertFalse(g.walkable(-1, 1))
         self.assertFalse(g.walkable(999, 1))
+        g.move(1, 0)
+        self.assertNotIn("wall blocks", g.message)
 
     def test_flash_consumption_repeat_and_exhaustion(self):
         g = Game()
@@ -59,6 +61,7 @@ class GameTests(unittest.TestCase):
         self.assertFalse(g.flash())
         self.assertEqual((g.charges, g.flashes_used), (1, 1))
         g.update(FLASH_DURATION)
+        self.assertIn("flash faded", g.message)
         self.assertTrue(g.flash())
         g.update(FLASH_DURATION)
         self.assertFalse(g.flash())
