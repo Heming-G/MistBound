@@ -12,7 +12,8 @@
 - [x] Student confirmed the roommate tried the original game before controls or gameplay were explained.
 - [ ] Student follows README from a fresh terminal and plays the revised game.
 - [ ] Student reviews and can explain input → state change → feedback.
-- [ ] Final documentation review.
-- [ ] Publish the complete project under Heming-G in one public GitHub repository, preserving commits.
-- [ ] Verify signed-out public access and exclude local scores, credentials and personal data.
+- [x] Final documentation review.
+- [x] Publish source, documentation and images at https://github.com/Heming-G/MistBound.
+- [x] Verify public access without authentication and exclude local scores, credentials and personal data.
+- [ ] Upload the prepared local development history and verify it appears in GitHub's commit list.
 - [ ] Student submits that repository URL on Canvas by 1 November 2026, 23:59 Hong Kong time.

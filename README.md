@@ -59,6 +59,8 @@ uv run python main.py --seed 261030
 
 Numbers from 0 to 999999 are supported. The same number reproduces the same map under the current version. On the development Mac, you can also double-click **Launch.command** after installing uv. In VS Code, open this folder and run the same commands in its terminal.
 
+If a browser-based download loses the launcher's executable permission on macOS, run `chmod +x Launch.command` from the project folder, or use the primary `uv run python main.py` command above.
+
 The dependency is **pygame-ce**, imported as `pygame`. Its exact version is recorded in `uv.lock`. Do not separately install the original `pygame` into this environment: both share an import name. No API keys, accounts, external assets or microphone are needed.
 
 ## Verification and example frames
@@ -98,4 +100,6 @@ On a headless macOS/Linux machine, prefix this image command with `SDL_VIDEODRIV
 
 Closing loses an unfinished run. Only completed records persist. The UI is English, uses a fixed window size and has no sound. It has not been evaluated for screen-reader use. Local records do not sync across computers. Map numbers are reproducible within this rules version; generation or gameplay changes should increment the map version.
 
-The roommate tried the original game without a prior explanation. Their feedback informed random maps, an initial sight reduction, a fourth fragment and same-map records. After restoring the larger sight ranges, the student found them too large and requested a midpoint. The current rules use version v4, keeping earlier visibility versions' records separate. See PROCESS.md. The current version has not yet had a participant retest. The student must follow the run instructions and review the code. Public GitHub upload and a signed-out access check remain pending.
+The roommate tried the original game without a prior explanation. Their feedback informed random maps, an initial sight reduction, a fourth fragment and same-map records. After restoring the larger sight ranges, the student found them too large and requested a midpoint. The current rules use version v4, keeping earlier visibility versions' records separate. See PROCESS.md. The current version has not yet had a participant retest. The student must follow the run instructions and review the code.
+
+Public repository: [Heming-G/MistBound](https://github.com/Heming-G/MistBound). On 31 October 2026, unauthenticated checks verified public access and all 22 source, documentation and image files against the local version. Development history is maintained in Git commits; the submission checklist tracks final publication verification.
