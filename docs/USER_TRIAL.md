@@ -15,15 +15,17 @@ The exact trial date, duration, first actions and completion outcome were not re
 ## Decisions made
 
 1. Randomize the maze and objective positions, with reachability and spacing constraints. Keep a map number and a same-map retry.
-2. Use ordinary sight radius 2 and flash radius 3; add one fragment (four total), keep the charge reward and stop sight growing after collection.
+2. Initially use ordinary sight radius 2 and flash radius 3; add one fragment (four total), keep the charge reward and stop sight growing after collection. The later student decision below supersedes the sight settings.
 3. Add a local top five for each map and rules version, ranked by steps then time. Keep different maps separate.
 
 ## Verification of the revision
 
-Automated checks cover random map constraints, smaller vision, no-flash completion, replay/new-map distinctions, ranking, persistence and unavailable record files. Rendered screens are reviewed. These are developer checks, not another participant trial.
+On 31 October 2026, the student requested restoring the original larger sight: ordinary radius 3 plus 0.4 per collected fragment, and flash radius 7. This was a student preference, not another roommate trial. The fourth fragment and random-map/records features remain. Scores for these v3 rules are separated from the earlier v2 reduced-sight records.
+
+Automated checks cover random map constraints, restored vision and growth, no-flash completion, replay/new-map distinctions, ranking, persistence and unavailable record files. Rendered screens are reviewed. These are developer checks, not another participant trial.
 
 ## Optional next trial
 
-The revised version has not yet been tried by this participant. Useful follow-up observations are whether the smaller sight still allows navigation, whether a flash reveals enough to be useful, and whether the player understands retrying the same map to improve a record. Record actual observations if a retest takes place.
+The current version has not yet been tried by this participant. Useful follow-up observations are whether the restored sight feels balanced on random maps, whether a flash is useful, and whether the player understands retrying the same map to improve a record. Record actual observations if a retest takes place.
 
 The original unassisted trial and the changes made in response are documented. A retest would help assess the revised difficulty and record system, but has not yet taken place.

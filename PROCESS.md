@@ -19,10 +19,12 @@ The student reported feedback from one roommate on 30 October 2026. On 31 Octobe
 | Reported feedback | Decision | Implemented response |
 | --- | --- | --- |
 | After two or three plays the map was easy to remember; random maps, fragments and exits might help. | Provide fresh exploration while allowing deliberate replay. | Seeded maze generation randomizes layout, start, four fragments and exit. R retries the current map; N creates a different map number. |
-| The illuminated area felt too large; reduce it and add one or two fragments. | Tighten sight and add one objective before attempting a larger increase. | Ordinary radius is now 2 tiles, flash radius 3, and there are four fragments. Collection restores one flash but no longer expands ordinary sight. |
+| The illuminated area felt too large; reduce it and add one or two fragments. | Initially tighten sight and add one objective before attempting a larger increase. | The first revision used ordinary radius 2 and flash radius 3, with four fragments and no sight growth. The student later requested restoring the original sight behavior, as recorded below. |
 | Time and step counters did not feel meaningful; consider a leaderboard. | Make comparisons meaningful within one map. | Each map has a persistent local top five, ordered by steps then time, with flashes shown as extra information. |
 
-The report mentioned a range of six tiles without specifying radius or diameter. The implementation uses the explicit radius-2/radius-3 values agreed in the follow-up discussion; these span at most five and seven tiles respectively. This is a design interpretation, not an additional participant measurement.
+The report mentioned a range of six tiles without specifying radius or diameter. The first revision used the radius-2/radius-3 interpretation agreed in the follow-up discussion, not an additional participant measurement.
+
+On 31 October 2026, the student requested a larger illuminated area and a return to the original sight behavior. Ordinary radius was restored to 3, growing by 0.4 for each fragment; with four fragments its maximum is 4.6. Flash radius was restored to 7. This is a later student design decision, not a new roommate trial finding. Random maps, four fragments and local records remain part of the design. The rules version was advanced to v3, preserving the old v2 records separately so results earned under different visibility rules are not mixed.
 
 The first trial meets the brief's condition of trying the experience before its controls were explained. The revised version has not yet been retested by a participant. Difficulty and whether the new record system motivates replay remain open questions. See `docs/USER_TRIAL.md`.
 
@@ -50,15 +52,15 @@ OpenAI Codex assisted with assignment interpretation, ideas, Python implementati
 
 - Kept: remembered fog and limited flashes replenished by collection.
 - Changed: a fixed-map exploration demo became a constrained random-map game after participant feedback.
-- Changed: collecting a fragment no longer enlarges normal sight because the trial found visibility too generous.
+- Iterated: the participant's request initially led to smaller sight without growth. After reviewing that direction, the student requested restoring the original larger sight and collection-based growth; Codex implemented that decision.
 - Scope decision: a global leaderboard was replaced by local same-map records so random-map scores are comparable without accounts or a server.
 
 ## Verification
 
-All 21 tests pass. They include 50 generated maps checked for connected floors and objective spacing, reproducibility and varied placements, no-flash completion on 10 maps, collision and feedback, fixed sight limits, one-time rewards, reset and new-map confirmation, pause/focus/records behavior, and one-time completion saving. Record tests verify sorting, the five-entry cap, map isolation, reloads, invalid data, corruption preservation and simulated write failures.
+All 21 tests pass. They include 50 generated maps checked for connected floors and objective spacing, reproducibility and varied placements, no-flash completion on 10 maps, collision and feedback, restored radius-3/radius-7 visibility and one-time sight growth per fragment, reset and new-map confirmation, pause/focus/records behavior, and one-time completion saving. Record tests verify sorting, the five-entry cap, map/rules-version isolation, reloads, invalid data, corruption preservation and simulated write failures.
 
 A separate stress check passed on 1,000 map numbers for connected floors, reachable objectives and minimum spacing from the start. The revised application opened and rendered with the native macOS Cocoa driver. Game-rendered frames of the title, normal sight, flash, pause, confirmation, completion and records screens were visually reviewed, including a full five-entry table. Preview records are isolated from the real local file. These developer checks do not imply a successful participant retest.
 
 ## Development history
 
-Commits preserve the original fixed-map version and its documentation. The next revision records the actual response to the roommate feedback: random maps, smaller sight, four fragments, local records, updated checks and documentation. Further changes after a real retest should be committed with their reasons.
+Commits preserve the original fixed-map version, the response to roommate feedback (random maps, smaller sight, four fragments and local records), and the student's later request to restore the original light ranges under rules version v3. Further changes after a real retest should be committed with their reasons.

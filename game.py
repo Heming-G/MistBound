@@ -4,8 +4,8 @@ import secrets
 from maze import MAX_SEED, MAP_VERSION, generate
 
 FLASH_DURATION = 1.7
-NORMAL_RADIUS = 2
-FLASH_RADIUS = 3
+NORMAL_RADIUS = 3
+FLASH_RADIUS = 7
 
 
 def line_cells(start, end):
@@ -65,17 +65,18 @@ class Game:
 
     @property
     def radius(self):
-        return NORMAL_RADIUS
+        return NORMAL_RADIUS + self.collected * 0.4
 
     def walkable(self, x, y):
         return 0 <= x < self.width and 0 <= y < self.height and self.grid[y][x] != "#"
 
     def reveal(self):
         radius = FLASH_RADIUS if self.flash_remaining > 0 else self.radius
+        extent = math.ceil(radius)
         px, py = self.player
         visible = set()
-        for y in range(max(0, py - radius), min(self.height, py + radius + 1)):
-            for x in range(max(0, px - radius), min(self.width, px + radius + 1)):
+        for y in range(max(0, py - extent), min(self.height, py + extent + 1)):
+            for x in range(max(0, px - extent), min(self.width, px + extent + 1)):
                 if math.hypot(x - px, y - py) > radius:
                     continue
                 # Ordinary light stops at walls; a scarce flash reveals through them.
@@ -103,7 +104,7 @@ class Game:
             self.lights.remove(self.player)
             self.collected += 1
             self.charges += 1
-            self.message = f"Fragment {self.collected}/{self.total_lights} found. +1 flash."
+            self.message = f"Fragment {self.collected}/{self.total_lights} found. +1 flash, and your light grows."
             if self.collected == self.total_lights:
                 self.message = "All fragments found. The exit is now open — find the green portal."
             result = "collected"
