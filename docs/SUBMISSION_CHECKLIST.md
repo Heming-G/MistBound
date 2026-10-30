@@ -9,10 +9,10 @@
 - [x] Real roommate feedback recorded and used for the revision.
 - [x] Gameplay, random-map and record-file tests pass.
 - [x] Development commits preserve decisions and revisions.
-- [ ] Confirm the participant tried the original game before controls were explained; otherwise arrange an unassisted trial.
+- [x] Student confirmed the roommate tried the original game before controls or gameplay were explained.
 - [ ] Student follows README from a fresh terminal and plays the revised game.
 - [ ] Student reviews and can explain input → state change → feedback.
-- [ ] Final documentation review, including the trial-condition confirmation.
+- [ ] Final documentation review.
 - [ ] Publish the complete project under Heming-G in one public GitHub repository, preserving commits.
 - [ ] Verify signed-out public access and exclude local scores, credentials and personal data.
 - [ ] Student submits that repository URL on Canvas by 1 November 2026, 23:59 Hong Kong time.

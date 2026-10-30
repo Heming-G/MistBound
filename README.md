@@ -98,4 +98,4 @@ On a headless macOS/Linux machine, prefix this image command with `SDL_VIDEODRIV
 
 Closing loses an unfinished run. Only completed records persist. The UI is English, uses a fixed window size and has no sound. It has not been evaluated for screen-reader use. Local records do not sync across computers. Map numbers are reproducible within this rules version; generation or gameplay changes should increment the map version.
 
-Roommate feedback informed random maps, tighter sight, a fourth fragment and same-map records; see PROCESS.md. Whether the first trial began without an explanation is still to confirm, and the revised version has not yet had a participant retest. The student must follow the run instructions and review the code. Public GitHub upload and a signed-out access check remain pending.
+The roommate tried the original game without a prior explanation. Their feedback informed random maps, tighter sight, a fourth fragment and same-map records; see PROCESS.md. The revised version has not yet had a participant retest. The student must follow the run instructions and review the code. Public GitHub upload and a signed-out access check remain pending.

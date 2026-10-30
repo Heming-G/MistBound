@@ -5,11 +5,12 @@
 - Participant: one roommate; no identifying information recorded.
 - Feedback received: 30 October 2026.
 - Version tried: the original fixed maze with three fragments and larger sight.
+- Trial condition: on 31 October 2026, the student confirmed that no controls or gameplay were explained before the roommate's first attempt; the roommate explored independently.
 - Reported observation: after two or three plays, the map was easy to memorize.
 - Reported preference: a smaller illuminated area and one or two additional fragments.
 - Reported concern: time and steps lacked a meaningful purpose; a leaderboard was suggested.
 
-The exact trial date, duration, first actions, completion outcome and whether the controls were explained before play were not reported. Do not interpret the feedback as evidence of those details. Confirmation of the no-prior-explanation condition is pending.
+The exact trial date, duration, first actions and completion outcome were not reported. Do not interpret the feedback as evidence of those details. The no-prior-explanation condition has been confirmed by the student.
 
 ## Decisions made
 
@@ -25,4 +26,4 @@ Automated checks cover random map constraints, smaller vision, no-flash completi
 
 The revised version has not yet been tried by this participant. Useful follow-up observations are whether the smaller sight still allows navigation, whether a flash reveals enough to be useful, and whether the player understands retrying the same map to improve a record. Record actual observations if a retest takes place.
 
-If the first trial included an explanation of the controls, ask another person to try without an explanation before submission, as required by the brief.
+The original unassisted trial and the changes made in response are documented. A retest would help assess the revised difficulty and record system, but has not yet taken place.

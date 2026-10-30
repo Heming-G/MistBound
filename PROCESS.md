@@ -14,7 +14,7 @@ During developer review, a persistent fog legend and a brightness floor were add
 
 ## Real participant trial and response
 
-The student reported feedback from one roommate on 30 October 2026. The exact session date, duration, first actions, completion result and whether controls were explained beforehand were not supplied. Those details are not invented here. The wording below summarizes the reported observations rather than quoting a transcript.
+The student reported feedback from one roommate on 30 October 2026. On 31 October, the student confirmed that they did not explain the controls or gameplay before the roommate first tried it; the roommate explored independently. The exact session date, duration, first actions and completion result were not supplied and are not invented here. The wording below summarizes the reported observations rather than quoting a transcript.
 
 | Reported feedback | Decision | Implemented response |
 | --- | --- | --- |
@@ -24,7 +24,7 @@ The student reported feedback from one roommate on 30 October 2026. The exact se
 
 The report mentioned a range of six tiles without specifying radius or diameter. The implementation uses the explicit radius-2/radius-3 values agreed in the follow-up discussion; these span at most five and seven tiles respectively. This is a design interpretation, not an additional participant measurement.
 
-The revised version has not yet been retested by a participant. Difficulty and whether the new record system motivates replay remain open questions. The first trial's no-prior-explanation condition still needs confirmation; if it was explained, arrange an unassisted trial with another person before submission. See `docs/USER_TRIAL.md`.
+The first trial meets the brief's condition of trying the experience before its controls were explained. The revised version has not yet been retested by a participant. Difficulty and whether the new record system motivates replay remain open questions. See `docs/USER_TRIAL.md`.
 
 ## Implementation choices after the trial
 
