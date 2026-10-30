@@ -67,8 +67,8 @@ A separate stress check passed on 1,000 map numbers for connected floors, reacha
 
 Commits preserve the original fixed-map version, the response to roommate feedback (random maps, smaller sight, four fragments and local records), the restoration under v3 rules, and the student's subsequent midpoint adjustment under v4 rules. Further changes after a real retest should be committed with their reasons.
 
-## Publication preparation
+## Publication and verification
 
 The student uploaded the project through GitHub's browser interface to the public repository Heming-G/MistBound. On 31 October 2026, unauthenticated checks confirmed public access and all 22 tracked files matched the local source and assets. The browser upload created one new commit but did not include the existing local development history, and the launcher lost its executable file mode.
 
-The browser upload and local development histories were merged locally without replacing either history. The launcher's executable permission was preserved, and the repository was linked to the existing GitHub remote. The prepared history and documentation updates still need to be pushed by the student using GitHub Desktop, then verified on GitHub. A backup of the pre-merge history was retained locally outside the project.
+The browser upload and local development histories were merged locally without replacing either history. The launcher's executable permission was preserved, and the repository was linked to the existing GitHub remote. On 31 October 2026, after the student authorized the upload and completed GitHub's browser login flow, Codex pushed the prepared history with the official GitHub CLI. Unauthenticated checks confirmed that all existing local commits were visible publicly, all 22 tracked files matched, and the launcher had executable file mode. A backup of the pre-merge history was retained locally outside the project. Canvas submission remains the student's responsibility.

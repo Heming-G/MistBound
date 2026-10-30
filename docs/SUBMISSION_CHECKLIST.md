@@ -15,5 +15,5 @@
 - [x] Final documentation review.
 - [x] Publish source, documentation and images at https://github.com/Heming-G/MistBound.
 - [x] Verify public access without authentication and exclude local scores, credentials and personal data.
-- [ ] Upload the prepared local development history and verify it appears in GitHub's commit list.
+- [x] Upload the prepared local development history and verify it appears in GitHub's commit list.
 - [ ] Student submits that repository URL on Canvas by 1 November 2026, 23:59 Hong Kong time.
